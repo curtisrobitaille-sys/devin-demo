@@ -134,3 +134,88 @@ main.stack { flex: 1; }
 .day-note { margin-top: 6px; font-style: italic; color: #d4d4d4; font-size: 14.5px; }
 
 .demo-footer { text-align: center; color: #737373; font-size: 12.5px; padding: 22px 0 4px; margin-top: auto; }
+
+/* ---------- pause / ghost button ---------- */
+.btn-ghost { background: transparent; border: 1px solid #3d3d3d; color: var(--muted); margin-top: 10px; }
+.btn-ghost:active { border-color: var(--lime-dark); color: var(--text); }
+.big-status.paused { color: #a3a3a3; }
+
+/* ---------- celebration ---------- */
+.celebrate {
+  background: #1d2908; border: 1px solid var(--lime); border-radius: 18px;
+  padding: 18px; text-align: center; margin-bottom: 14px;
+}
+.celebrate-badge {
+  width: 64px; height: 64px; margin: 2px auto 10px; border-radius: 50%;
+  background: var(--lime); display: flex; align-items: center; justify-content: center;
+  animation: celeb-pop .6s ease-out, celeb-ring 1.4s ease-out;
+}
+.celebrate-check { color: #0a0a0a; font-size: 34px; font-weight: 900; line-height: 1; }
+@keyframes celeb-pop { 0% { transform: scale(.3); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes celeb-ring { 0% { box-shadow: 0 0 0 0 rgba(159, 214, 46, .55); } 100% { box-shadow: 0 0 0 24px rgba(159, 214, 46, 0); } }
+.celebrate-line { font-weight: 800; font-size: 17px; }
+.celebrate-sub { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+
+/* ---------- kudos ---------- */
+.kudos-card { border-color: var(--lime-dark); background: #1d2908; text-align: center; }
+.kudos-emoji { font-size: 46px; line-height: 1.15; }
+.kudos-line { font-size: 17px; font-weight: 700; font-style: italic; }
+.kudos-btns { display: flex; gap: 10px; }
+.kudos-btns form { flex: 1; }
+.kudos-btn {
+  width: 100%; padding: 12px; font-size: 26px; line-height: 1.2;
+  background: #0f0f0f; border: 1px solid #333; border-radius: 12px;
+  color: var(--text); cursor: pointer;
+}
+.kudos-btn:active { border-color: var(--lime); }
+.kudos-lines { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.kudos-btn.line { font-size: 15px; font-weight: 700; text-align: left; padding: 13px 14px; }
+.kudos-sent { margin-top: 12px; color: var(--muted); font-size: 13.5px; }
+
+/* ---------- week recap + stat row ---------- */
+.stat-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.stat-row.three .stat { padding: 14px 6px; }
+.stat-row.three .stat-num { font-size: 32px; }
+.stat-row.three .stat-label { font-size: 11px; }
+.recap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.recap-item { background: #0f0f0f; border: 1px solid #232323; border-radius: 12px; padding: 12px 8px; text-align: center; }
+.recap-num {
+  display: block; font-size: 26px; font-weight: 900; color: var(--lime);
+  font-family: "Arial Narrow", "Helvetica Neue Condensed Bold", -apple-system, sans-serif;
+}
+.recap-label { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; }
+.recap-trend { margin-top: 13px; font-weight: 800; font-size: 16px; }
+.recap-trend.good { color: var(--lime); }
+.recap-trend.warn { color: #fbbf24; }
+.recap-line { margin-top: 9px; font-size: 15px; }
+
+/* ---------- month dot calendar ---------- */
+.cal-head, .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-head { color: var(--muted); font-size: 11px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+.cal-week { margin-top: 6px; }
+.cal-cell {
+  aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 13px; font-weight: 700;
+}
+.cal-cell.done { background: var(--lime); color: #0a0a0a; }
+.cal-cell.paused { background: #525252; color: #e5e5e5; }
+.cal-cell.hollow { border: 1px solid #2c2c2c; color: #737373; }
+.cal-cell.today { outline: 2px solid #fff; outline-offset: 1px; }
+.cal-cell.empty { border: none; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 13px; color: var(--muted); font-size: 12.5px; }
+.cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.cal-dot.done { background: var(--lime); }
+.cal-dot.paused { background: #525252; }
+.cal-dot.hollow { border: 1px solid #4a4a4a; }
+
+/* ---------- roster mini strip ---------- */
+.strip { display: flex; gap: 4px; margin-top: 7px; }
+.sdot { width: 9px; height: 9px; border-radius: 50%; display: block; }
+.sdot.done { background: var(--lime); }
+.sdot.paused { background: #8a8a8a; }
+.sdot.missed { border: 1px solid #4a4a4a; }
+.dot.paused { background: #8a8a8a; }
+
+/* ---------- badge up-next ---------- */
+.badge.next { opacity: .8; border: 1px dashed var(--lime-dark); background: #151a0c; }

@@ -16,12 +16,31 @@
   {% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}
 {% endwith %}
 
+{% if celebrate %}
+<div class="celebrate">
+  <div class="celebrate-badge"><span class="celebrate-check">✓</span></div>
+  <div class="celebrate-line">{{ celebrate_line }}</div>
+  <div class="celebrate-sub">Check-in saved — day {{ streak }} of your streak.</div>
+</div>
+{% endif %}
+
 <main class="stack">
+  {% if kudos %}
+  <section class="card kudos-card">
+    <div class="card-label">Coach Devin sent you</div>
+    {% if kudos.kind %}<div class="kudos-emoji">{{ kudos.kind }}</div>{% endif %}
+    {% if kudos.message %}<p class="kudos-line">&ldquo;{{ kudos.message }}&rdquo;</p>{% endif %}
+  </section>
+  {% endif %}
+
   <section class="card checkin-card">
     <div class="card-label">Today's check-in</div>
     {% if done_today %}
       <div class="big-status done">Done ✓</div>
       <p class="muted">Locked in for today. Coach sees it on his board already.</p>
+    {% elif paused_today %}
+      <div class="big-status paused">Paused</div>
+      <p class="muted">Life happens. Today is on pause — your streak is safe.</p>
     {% else %}
       <div class="big-status pending">Not yet</div>
       <p class="muted">Takes 30 seconds. Weight, food, steps — that's it.</p>
@@ -29,12 +48,23 @@
     <a class="btn btn-lime" href="{{ url_for('client_checkin') }}">
       {% if done_today %}Update today's check-in{% else %}Do today's check-in{% endif %}
     </a>
+    {% if not done_today %}
+    <form method="post" action="{{ url_for('client_pause') }}">
+      <button class="btn btn-ghost" type="submit">
+        {% if paused_today %}Un-pause today{% else %}Life happens — pause today{% endif %}
+      </button>
+    </form>
+    {% endif %}
   </section>
 
-  <section class="stat-row">
+  <section class="stat-row three">
     <div class="card stat">
       <div class="stat-num">{{ streak }}</div>
       <div class="stat-label">Day streak 🔥</div>
+    </div>
+    <div class="card stat">
+      <div class="stat-num">{{ week_streak }}</div>
+      <div class="stat-label">Week streak 🗓️</div>
     </div>
     <div class="card stat">
       <div class="stat-num">−{{ "%.1f"|format(lost) }}</div>
@@ -49,6 +79,29 @@
       <span class="muted">started {{ "%.1f"|format(start) }} lbs</span>
     </div>
     <div class="progress-track"><div class="progress-fill" style="width: {{ [lost * 10, 100]|min }}%"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-label">Your week</div>
+    <div class="recap-grid">
+      <div class="recap-item">
+        <span class="recap-num">{{ recap.count }}/7</span>
+        <span class="recap-label">Check-ins this week</span>
+      </div>
+      <div class="recap-item">
+        <span class="recap-num">{{ "{:,}".format(recap.avg_steps) }}</span>
+        <span class="recap-label">Avg steps per day</span>
+      </div>
+    </div>
+    {% if recap.trend %}
+    <div class="recap-trend {{ 'good' if recap.trend.good else 'warn' }}">
+      {{ recap.trend.arrow }} Weight trend: {{ recap.trend.text }}
+    </div>
+    {% endif %}
+    {% if recap.best_steps %}
+    <div class="recap-line">🏅 Personal best: {{ "{:,}".format(recap.best_steps) }} steps — {{ recap.best_day }}</div>
+    {% endif %}
+    <div class="recap-line">🔥 {{ recap_status }}</div>
   </section>
 
   {% if wins %}

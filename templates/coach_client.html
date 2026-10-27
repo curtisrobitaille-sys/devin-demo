@@ -12,11 +12,40 @@
   <p class="sub">
     🔥 {{ streak }}-day streak ·
     {{ "%.1f"|format(start) }} → {{ "%.1f"|format(now) }} lbs (−{{ "%.1f"|format(lost) }}) ·
-    {{ "checked in today ✓" if in_today else "no check-in yet today" }}
+    {{ "checked in today ✓" if in_today else ("paused today — streak safe" if paused_today else "no check-in yet today") }}
   </p>
 </header>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}
+{% endwith %}
+
 <main class="stack">
+  <section class="card">
+    <div class="card-label">Send kudos — lands on their home screen today</div>
+    <div class="kudos-btns">
+      {% for e in kudos_emoji %}
+      <form method="post" action="{{ url_for('coach_kudos', client_id=client.id) }}">
+        <input type="hidden" name="kind" value="{{ e }}">
+        <button class="kudos-btn" type="submit" aria-label="Send {{ e }} kudos">{{ e }}</button>
+      </form>
+      {% endfor %}
+    </div>
+    <div class="kudos-lines">
+      {% for line in kudos_lines %}
+      <form method="post" action="{{ url_for('coach_kudos', client_id=client.id) }}">
+        <input type="hidden" name="message" value="{{ line }}">
+        <button class="kudos-btn line" type="submit">&ldquo;{{ line }}&rdquo;</button>
+      </form>
+      {% endfor %}
+    </div>
+    {% if sent_kudos %}
+    <div class="kudos-sent">Sent today:
+      {% for k in sent_kudos %}{% if k.kind %}{{ k.kind }}{% else %}&ldquo;{{ k.message }}&rdquo;{% endif %}{{ ", " if not loop.last }}{% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
   <section class="card">
     <div class="card-label">Last 7 days</div>
     <div class="day-list">

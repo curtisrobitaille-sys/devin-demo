@@ -31,10 +31,11 @@
   <section class="stack roster">
     {% for r in roster %}
     <a class="card roster-row" href="{{ url_for('coach_client', client_id=r.client.id) }}">
-      <span class="dot {{ 'on' if r.in_today else 'off' }}"></span>
+      <span class="dot {{ 'on' if r.in_today else ('paused' if r.paused_today else 'off') }}"></span>
       <span class="roster-main">
         <span class="roster-name">{{ r.client.name }}</span>
-        <span class="roster-sub">{{ "Checked in today" if r.in_today else "No check-in yet today" }}</span>
+        <span class="roster-sub">{{ "Checked in today" if r.in_today else ("Paused today" if r.paused_today else "No check-in yet today") }}</span>
+        <span class="strip">{% for s in r.strip %}<i class="sdot {{ s }}"></i>{% endfor %}</span>
       </span>
       <span class="roster-side">
         <span class="roster-streak">🔥 {{ r.streak }}</span>
