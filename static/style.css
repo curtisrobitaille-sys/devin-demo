@@ -219,3 +219,11 @@ main.stack { flex: 1; }
 
 /* ---------- badge up-next ---------- */
 .badge.next { opacity: .8; border: 1px dashed var(--lime-dark); background: #151a0c; }
+
+/* ---------- team challenge ---------- */
+.challenge-name { font-family: var(--font-display, inherit); font-size: 19px; font-weight: 800; letter-spacing: .04em; color: var(--text); }
+.challenge-count { margin-top: 8px; font-size: 15px; color: var(--muted); }
+.challenge-count strong { color: var(--lime); font-size: 22px; }
+.challenge-track { height: 14px; }
+.challenge-finished { margin-top: 8px; font-weight: 800; color: var(--lime); font-size: 16px; }
+.challenge-in { margin-top: 10px; font-weight: 700; color: var(--lime); }

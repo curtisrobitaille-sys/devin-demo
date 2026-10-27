@@ -13,6 +13,19 @@
 </header>
 
 <main class="stack">
+  {% if challenge %}
+  <section class="card challenge-card">
+    <div class="card-label">Team challenge</div>
+    <div class="challenge-name">{{ challenge.name }}</div>
+    {% if challenge.finished %}
+    <div class="challenge-finished">🏁 FINISHED — Team Devin crossed the line!</div>
+    {% endif %}
+    <div class="challenge-count"><strong>{{ challenge.total }}</strong> / {{ challenge.goal }} team check-ins</div>
+    <div class="progress-track challenge-track"><div class="progress-fill" style="width: {{ challenge.pct }}%"></div></div>
+    <p class="muted">{{ challenge.finish_label }} · {{ challenge.joined_count }} of {{ total_clients }} clients in</p>
+  </section>
+  {% endif %}
+
   <section class="tiles">
     <div class="card tile">
       <div class="stat-num">{{ checked_today }}<span class="stat-of">/{{ total_clients }}</span></div>

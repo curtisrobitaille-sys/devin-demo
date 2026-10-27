@@ -104,6 +104,26 @@
     <div class="recap-line">🔥 {{ recap_status }}</div>
   </section>
 
+  {% if challenge %}
+  <section class="card challenge-card">
+    <div class="card-label">Team challenge</div>
+    <div class="challenge-name">{{ challenge.name }}</div>
+    {% if challenge.finished %}
+    <div class="challenge-finished">🏁 FINISHED — Team Devin crossed the line!</div>
+    {% endif %}
+    <div class="challenge-count"><strong>{{ challenge.total }}</strong> / {{ challenge.goal }} team check-ins</div>
+    <div class="progress-track challenge-track"><div class="progress-fill" style="width: {{ challenge.pct }}%"></div></div>
+    <p class="muted">{{ challenge.finish_label }} · {{ challenge.joined_count }} of {{ roster_size }} teammates in</p>
+    {% if sarah_joined %}
+    <p class="challenge-in">You're in ✓ — every check-in you log counts.</p>
+    {% elif not challenge.finished %}
+    <form method="post" action="{{ url_for('client_join_challenge') }}">
+      <button class="btn btn-lime" type="submit">Join the challenge</button>
+    </form>
+    {% endif %}
+  </section>
+  {% endif %}
+
   {% if wins %}
   <section class="card">
     <div class="card-label">This week's wins</div>

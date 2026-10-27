@@ -72,12 +72,54 @@ def init_db():
             date      TEXT NOT NULL,
             UNIQUE (client_id, date)
         );
+        CREATE TABLE IF NOT EXISTS challenge (
+            id   INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            goal INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS challenge_joins (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER NOT NULL REFERENCES clients(id),
+            day       TEXT NOT NULL,
+            baseline  INTEGER NOT NULL DEFAULT 0,
+            UNIQUE (client_id)
+        );
         """
     )
     conn.commit()
     if conn.execute("SELECT COUNT(*) FROM clients").fetchone()[0] == 0:
         seed(conn)
+    ensure_challenge(conn)
     conn.close()
+
+
+CHALLENGE_NAME = "TEAM DEVIN — CHECK-IN CHALLENGE"
+
+
+def ensure_challenge(conn):
+    """Create the team challenge the first time the table is seen empty
+    (fresh seed or an older database alike). Every roster client except
+    the demo client starts out joined with a zero baseline, so their
+    check-ins set the team's progress; the goal is set exactly one
+    check-in past that progress, so the demo client joining and logging
+    today's check-in is what carries the team over the line."""
+    if conn.execute("SELECT COUNT(*) FROM challenge").fetchone()[0] > 0:
+        return
+    today_iso = date.today().isoformat()
+    conn.execute(
+        """INSERT OR IGNORE INTO challenge_joins (client_id, day, baseline)
+           SELECT id, ?, 0 FROM clients WHERE name != ?""",
+        (today_iso, DEMO_CLIENT_NAME),
+    )
+    progress = conn.execute(
+        """SELECT COUNT(*) FROM checkins
+           WHERE client_id IN (SELECT client_id FROM challenge_joins)"""
+    ).fetchone()[0]
+    conn.execute(
+        "INSERT INTO challenge (name, goal) VALUES (?, ?)",
+        (CHALLENGE_NAME, progress + 1),
+    )
+    conn.commit()
 
 
 # ---------------------------------------------------------------- seed data
@@ -162,6 +204,40 @@ def kudos_for_day(client_id, day_iso):
     ).fetchall()
 
 
+def challenge_state():
+    """The team challenge at a glance. Only joined members' check-ins
+    count, and only the ones logged from their join onward — each join
+    records a baseline (the member's check-in count at that moment), so
+    joining never retroactively moves the total."""
+    ch = db().execute("SELECT * FROM challenge ORDER BY id LIMIT 1").fetchone()
+    if ch is None:
+        return None
+    joins = db().execute("SELECT * FROM challenge_joins").fetchall()
+    total = 0
+    for j in joins:
+        cnt = db().execute(
+            "SELECT COUNT(*) FROM checkins WHERE client_id = ?",
+            (j["client_id"],),
+        ).fetchone()[0]
+        total += max(cnt - j["baseline"], 0)
+    today = date.today()
+    if today.month == 12:
+        last_day = date(today.year, 12, 31)
+    else:
+        last_day = date(today.year, today.month + 1, 1) - timedelta(days=1)
+    goal = ch["goal"]
+    return {
+        "name": ch["name"],
+        "goal": goal,
+        "total": total,
+        "finished": total >= goal,
+        "pct": min(100, round(100 * total / goal)) if goal else 100,
+        "joined_ids": {j["client_id"] for j in joins},
+        "joined_count": len(joins),
+        "finish_label": "Finishes " + last_day.strftime("%b %d"),
+    }
+
+
 def streak_for(rows, paused=frozenset()):
     """Consecutive checked-in days ending today (or yesterday if today is
     still outstanding — the day isn't over yet). A paused day is neutral:
@@ -229,7 +305,7 @@ def weight_stats(rows):
     return start, now, round(start - now, 1)
 
 
-def badges_for(rows, paused=frozenset()):
+def badges_for(rows, paused=frozenset(), team_finisher=False):
     _start, _now, lost = weight_stats(rows)
     streak = streak_for(rows, paused)
     week_counts = {}
@@ -261,6 +337,8 @@ def badges_for(rows, paused=frozenset()):
          "hint": "Reach 100 total check-ins"},
         {"name": "Back at it", "icon": "🌱", "earned": back_at_it,
          "hint": "Come back after a 3+ day break"},
+        {"name": "Team Finisher", "icon": "🏁", "earned": team_finisher,
+         "hint": "Cross the finish line in a team challenge"},
     ]
     for b in badges:
         if not b["earned"]:
@@ -425,6 +503,8 @@ def client_home():
     celebrate = session.pop("celebrate", False)
     celebrate_line = CELEBRATION_LINES[
         date.today().timetuple().tm_yday % len(CELEBRATION_LINES)]
+    ch = challenge_state()
+    roster_size = db().execute("SELECT COUNT(*) FROM clients").fetchone()[0]
     return render_template(
         "client_home.html", client=sarah, done_today=done_today,
         paused_today=paused_today, streak=streak,
@@ -433,7 +513,31 @@ def client_home():
         recap=week_recap(rows), recap_status=recap_status,
         kudos=today_kudos[0] if today_kudos else None,
         celebrate=celebrate, celebrate_line=celebrate_line,
+        challenge=ch, roster_size=roster_size,
+        sarah_joined=(sarah["id"] in ch["joined_ids"]) if ch else False,
     )
+
+
+@app.route("/client/join-challenge", methods=["POST"])
+def client_join_challenge():
+    sarah = get_client(DEMO_CLIENT_NAME)
+    already = db().execute(
+        "SELECT id FROM challenge_joins WHERE client_id = ?",
+        (sarah["id"],),
+    ).fetchone()
+    if not already:
+        baseline = db().execute(
+            "SELECT COUNT(*) FROM checkins WHERE client_id = ?",
+            (sarah["id"],),
+        ).fetchone()[0]
+        db().execute(
+            """INSERT OR IGNORE INTO challenge_joins (client_id, day, baseline)
+               VALUES (?, ?, ?)""",
+            (sarah["id"], date.today().isoformat(), baseline),
+        )
+        db().commit()
+        flash("You're in! Every check-in you log now counts toward the team total.")
+    return redirect(url_for("client_home"))
 
 
 @app.route("/client/checkin", methods=["GET", "POST"])
@@ -500,10 +604,14 @@ def client_progress():
     start, now, lost = weight_stats(rows)
     points, dots = sparkline_points(rows)
     month_label, cal_weeks = month_calendar(rows, paused)
+    ch = challenge_state()
+    team_finisher = bool(
+        ch and ch["finished"] and sarah["id"] in ch["joined_ids"])
     return render_template(
         "progress.html", client=sarah, rows=list(reversed(rows)),
         start=start, now=now, lost=lost, points=points, dots=dots,
-        badges=badges_for(rows, paused), streak=streak_for(rows, paused),
+        badges=badges_for(rows, paused, team_finisher=team_finisher),
+        streak=streak_for(rows, paused),
         month_label=month_label, cal_weeks=cal_weeks,
     )
 
@@ -533,6 +641,7 @@ def coach():
         "coach.html", roster=roster, checked_today=checked_today,
         total_clients=len(roster), avg_streak=avg_streak,
         total_lost=round(total_lost, 1),
+        challenge=challenge_state(),
     )
 
 
