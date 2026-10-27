@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} — Coach View{% endblock %}
+{% block body %}
+<nav class="topbar">
+  <a href="{{ url_for('coach') }}" class="topbar-back">‹ Roster</a>
+  <span class="topbar-brand">Coach View</span>
+  <span class="topbar-link"></span>
+</nav>
+
+<header class="page-head">
+  <h1>{{ client.name }}</h1>
+  <p class="sub">
+    🔥 {{ streak }}-day streak ·
+    {{ "%.1f"|format(start) }} → {{ "%.1f"|format(now) }} lbs (−{{ "%.1f"|format(lost) }}) ·
+    {{ "checked in today ✓" if in_today else "no check-in yet today" }}
+  </p>
+</header>
+
+<main class="stack">
+  <section class="card">
+    <div class="card-label">Last 7 days</div>
+    <div class="day-list">
+      {% for r in detail %}
+      <div class="day-row">
+        <div class="day-head">
+          <strong>{{ r.label }}</strong>
+          <span class="day-weight">{{ "%.1f"|format(r.weight) }} lbs</span>
+        </div>
+        <div class="day-metrics">
+          <span>🍽 Food {{ r.food }}/10</span>
+          <span>👣 {{ "{:,}".format(r.steps) }} steps</span>
+          <span>💧 {{ r.water }} glasses</span>
+          <span>😴 {{ "%.1f"|format(r.sleep) }} h</span>
+          <span>⚡ Energy {{ r.energy }}/10</span>
+        </div>
+        {% if r.note %}<div class="day-note">“{{ r.note }}”</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

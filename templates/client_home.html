@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Sarah's Home — Devin Sherrington Coaching{% endblock %}
+{% block body %}
+<nav class="topbar">
+  <a href="{{ url_for('landing') }}" class="topbar-back">‹ Home</a>
+  <span class="topbar-brand">Team Devin</span>
+  <a href="{{ url_for('client_progress') }}" class="topbar-link">Progress</a>
+</nav>
+
+<header class="page-head">
+  <h1>Hey Sarah 👋</h1>
+  <p class="sub">Busy day or not — one check-in keeps the streak alive.</p>
+</header>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}
+{% endwith %}
+
+<main class="stack">
+  <section class="card checkin-card">
+    <div class="card-label">Today's check-in</div>
+    {% if done_today %}
+      <div class="big-status done">Done ✓</div>
+      <p class="muted">Locked in for today. Coach sees it on his board already.</p>
+    {% else %}
+      <div class="big-status pending">Not yet</div>
+      <p class="muted">Takes 30 seconds. Weight, food, steps — that's it.</p>
+    {% endif %}
+    <a class="btn btn-lime" href="{{ url_for('client_checkin') }}">
+      {% if done_today %}Update today's check-in{% else %}Do today's check-in{% endif %}
+    </a>
+  </section>
+
+  <section class="stat-row">
+    <div class="card stat">
+      <div class="stat-num">{{ streak }}</div>
+      <div class="stat-label">Day streak 🔥</div>
+    </div>
+    <div class="card stat">
+      <div class="stat-num">−{{ "%.1f"|format(lost) }}</div>
+      <div class="stat-label">Lbs lost</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-label">Weight</div>
+    <div class="weight-line">
+      <span><strong>{{ "%.1f"|format(now) }} lbs</strong> now</span>
+      <span class="muted">started {{ "%.1f"|format(start) }} lbs</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width: {{ [lost * 10, 100]|min }}%"></div></div>
+  </section>
+
+  {% if wins %}
+  <section class="card">
+    <div class="card-label">This week's wins</div>
+    <ul class="wins">
+      {% for w in wins %}<li>🏆 {{ w }}</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

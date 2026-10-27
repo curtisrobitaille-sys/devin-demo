@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Sarah's Progress — Team Devin{% endblock %}
+{% block body %}
+<nav class="topbar">
+  <a href="{{ url_for('client_home') }}" class="topbar-back">‹ Back</a>
+  <span class="topbar-brand">Team Devin</span>
+  <span class="topbar-link"></span>
+</nav>
+
+<header class="page-head">
+  <h1>Your progress</h1>
+  <p class="sub">{{ "%.1f"|format(start) }} → {{ "%.1f"|format(now) }} lbs · down {{ "%.1f"|format(lost) }} · {{ streak }}-day streak</p>
+</header>
+
+<main class="stack">
+  <section class="card">
+    <div class="card-label">Weight — last {{ rows|length }} check-ins</div>
+    <svg class="spark" viewBox="0 0 340 96" preserveAspectRatio="none" aria-hidden="true">
+      <polyline points="{{ points }}" fill="none" stroke="#9fd62e" stroke-width="3"
+                stroke-linejoin="round" stroke-linecap="round"/>
+      {% for x, y in dots %}
+      <circle cx="{{ x }}" cy="{{ y }}" r="3.5" fill="#0a0a0a" stroke="#9fd62e" stroke-width="2"/>
+      {% endfor %}
+    </svg>
+    <ul class="history">
+      {% for r in rows %}
+      <li><span>{{ r.day }}</span><strong>{{ "%.1f"|format(r.weight) }} lbs</strong></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="card-label">Badge shelf</div>
+    <div class="badges">
+      {% for b in badges %}
+      <div class="badge {{ 'earned' if b.earned else 'dim' }}">
+        <div class="badge-icon">{{ b.icon }}</div>
+        <div class="badge-name">{{ b.name }}</div>
+        <div class="badge-hint">{{ "Earned ✓" if b.earned else b.hint }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

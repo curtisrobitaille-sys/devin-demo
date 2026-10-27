@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body %}
+<header class="hero">
+  <div class="hero-kicker">360FIT · Dartmouth</div>
+  <h1 class="hero-name">Devin<br>Sherrington</h1>
+  <div class="hero-role">Fat Loss Coach</div>
+  <p class="hero-promise">I help busy people lose fat &amp; boost energy — without giving up the foods you love.</p>
+  <p class="hero-founder">Founder of 360FIT — High Intensity Fitness, Dartmouth</p>
+</header>
+
+<main class="stack">
+  <a class="door door-lime" href="{{ url_for('client_home') }}">
+    <span class="door-title">View as a client</span>
+    <span class="door-sub">See the daily check-in experience</span>
+  </a>
+  <a class="door door-dark" href="{{ url_for('coach') }}">
+    <span class="door-title">View as Devin (coach view)</span>
+    <span class="door-sub">The whole roster on one screen</span>
+  </a>
+</main>
+{% endblock %}

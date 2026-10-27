@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Coach Dashboard — Devin Sherrington{% endblock %}
+{% block body %}
+<nav class="topbar">
+  <a href="{{ url_for('landing') }}" class="topbar-back">‹ Home</a>
+  <span class="topbar-brand">Coach View</span>
+  <span class="topbar-link"></span>
+</nav>
+
+<header class="page-head">
+  <h1>Morning, Coach 💪</h1>
+  <p class="sub">Your whole roster before your first coffee. No digging through chats.</p>
+</header>
+
+<main class="stack">
+  <section class="tiles">
+    <div class="card tile">
+      <div class="stat-num">{{ checked_today }}<span class="stat-of">/{{ total_clients }}</span></div>
+      <div class="stat-label">Checked in today</div>
+    </div>
+    <div class="card tile">
+      <div class="stat-num">{{ avg_streak }}</div>
+      <div class="stat-label">Average streak</div>
+    </div>
+    <div class="card tile">
+      <div class="stat-num">−{{ total_lost }}</div>
+      <div class="stat-label">Total lbs lost</div>
+    </div>
+  </section>
+
+  <section class="stack roster">
+    {% for r in roster %}
+    <a class="card roster-row" href="{{ url_for('coach_client', client_id=r.client.id) }}">
+      <span class="dot {{ 'on' if r.in_today else 'off' }}"></span>
+      <span class="roster-main">
+        <span class="roster-name">{{ r.client.name }}</span>
+        <span class="roster-sub">{{ "Checked in today" if r.in_today else "No check-in yet today" }}</span>
+      </span>
+      <span class="roster-side">
+        <span class="roster-streak">🔥 {{ r.streak }}</span>
+        <span class="roster-loss">−{{ "%.1f"|format(r.lost) }} lbs</span>
+      </span>
+    </a>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

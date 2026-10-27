@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Daily Check-In — Team Devin{% endblock %}
+{% block body %}
+<nav class="topbar">
+  <a href="{{ url_for('client_home') }}" class="topbar-back">‹ Back</a>
+  <span class="topbar-brand">Team Devin</span>
+  <span class="topbar-link"></span>
+</nav>
+
+<header class="page-head">
+  <h1>Today's check-in</h1>
+  <p class="sub">Honest numbers beat perfect numbers. Every time.</p>
+</header>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}<div class="flash warn">{{ messages[0] }}</div>{% endif %}
+{% endwith %}
+
+<main class="stack">
+  <form class="card form" method="post" action="{{ url_for('client_checkin') }}">
+    <label>Weight (lbs)
+      <input type="number" name="weight" step="0.1" min="50" max="600" required
+             value="{{ '%.1f'|format(last.weight) if last else '' }}" inputmode="decimal">
+    </label>
+    <div class="form-grid">
+      <label>Food (1–10)
+        <input type="number" name="food" min="1" max="10" required inputmode="numeric"
+               value="{{ last.food if last else '' }}">
+      </label>
+      <label>Energy (1–10)
+        <input type="number" name="energy" min="1" max="10" required inputmode="numeric"
+               value="{{ last.energy if last else '' }}">
+      </label>
+      <label>Steps
+        <input type="number" name="steps" min="0" max="100000" required inputmode="numeric"
+               value="{{ last.steps if last else '' }}">
+      </label>
+      <label>Water (glasses)
+        <input type="number" name="water" min="0" max="30" required inputmode="numeric"
+               value="{{ last.water if last else '' }}">
+      </label>
+    </div>
+    <label>Sleep (hours)
+      <input type="number" name="sleep" step="0.1" min="0" max="24" required inputmode="decimal"
+             value="{{ '%.1f'|format(last.sleep) if last else '' }}">
+    </label>
+    <label>One-line note
+      <input type="text" name="note" maxlength="140" placeholder="How'd today go?">
+    </label>
+    <button class="btn btn-lime" type="submit">Save check-in</button>
+  </form>
+</main>
+{% endblock %}
