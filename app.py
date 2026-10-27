@@ -5,12 +5,13 @@ Seed data is created on first boot (only when the tables are empty).
 Run:  python app.py            (uses $PORT or 5000)
   or: gunicorn app:app
 """
+import base64
 import os
 import random
 import sqlite3
 from datetime import date, datetime, timedelta
 
-from flask import (Flask, abort, flash, g, redirect, render_template,
+from flask import (Flask, Response, abort, flash, g, redirect, render_template,
                    request, session, url_for)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -689,6 +690,37 @@ def coach_kudos(client_id):
     db().commit()
     flash(f"Kudos sent to {c['name']} — they'll see it on their home screen.")
     return redirect(url_for("coach_client", client_id=client_id))
+
+
+# ---------------------------------------------------------------- app icons
+_ICON_CACHE = {}
+
+
+def _icon_bytes(filename):
+    if filename not in _ICON_CACHE:
+        with open(os.path.join(BASE, "icondata", filename), "rb") as f:
+            _ICON_CACHE[filename] = base64.b64decode(f.read())
+    return _ICON_CACHE[filename]
+
+
+@app.route("/apple-touch-icon.png")
+def apple_touch_icon():
+    return Response(_icon_bytes("icon_apple_b64.txt"), mimetype="image/png")
+
+
+@app.route("/icon-192.png")
+def icon_192():
+    return Response(_icon_bytes("icon_192_b64.txt"), mimetype="image/png")
+
+
+@app.route("/icon-512.png")
+def icon_512():
+    return Response(_icon_bytes("icon_512_b64.txt"), mimetype="image/png")
+
+
+@app.route("/favicon.png")
+def favicon_png():
+    return Response(_icon_bytes("icon_192_b64.txt"), mimetype="image/png")
 
 
 init_db()
