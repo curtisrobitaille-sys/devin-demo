@@ -7,9 +7,15 @@
   <a href="{{ url_for('client_progress') }}" class="topbar-link">Progress</a>
 </nav>
 
-<header class="page-head">
-  <h1>Hey Sarah 👋</h1>
-  <p class="sub">Busy day or not — one check-in keeps the streak alive.</p>
+<header class="page-head profile-row">
+  <div class="avatar-wrap">
+    <img class="avatar" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop" alt="Sarah M." onerror="this.style.display='none'">
+    <span class="avatar-dot"></span>
+  </div>
+  <div class="page-head-text">
+    <h1>Hey Sarah 👋</h1>
+    <p class="sub">Busy day or not — one check-in keeps the streak alive.</p>
+  </div>
 </header>
 
 {% with messages = get_flashed_messages() %}
